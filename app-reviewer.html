@@ -317,57 +317,45 @@
 
     /* ── Main Panel ── */
     .main {
-      overflow-y: auto;
-      padding: 24px;
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      overflow: hidden;
       min-height: 0;
-      /* grid child fix: allow cell to be smaller than content */
     }
 
-    .main::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    .main::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
-    .main::-webkit-scrollbar-thumb {
-      background: var(--border);
-      border-radius: 4px;
-    }
-
-    /* ── Item Detail Card ── */
-    .detail-card {
+    /* ── Content Card (fills main panel) ── */
+    .content-card {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
       background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
+      border-right: 0;
+      border-left: 0;
     }
 
-    .detail-card-header {
-      padding: 14px 18px;
+    /* ── Fields tab ── */
+    .fields-header {
+      padding: 16px 24px 12px;
       border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
     }
 
-    .detail-card-title {
+    .fields-title {
       font-size: 18px;
       font-weight: 700;
       color: var(--text-1);
     }
 
-    .detail-card-sub {
-      font-size: 12px;
-      color: var(--text-3);
-      margin-top: 3px;
+    .fields-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0 24px 20px;
     }
 
-    .fields-grid {
-      padding: 8px 18px 16px;
-      display: flex;
-      flex-direction: column;
-    }
+    .fields-scroll::-webkit-scrollbar { width: 6px; }
+    .fields-scroll::-webkit-scrollbar-track { background: transparent; }
+    .fields-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 
     .qa-item {
       padding: 11px 0;
@@ -403,38 +391,19 @@
       font-style: italic;
     }
 
-    /* ── Template / Send Card ── */
-    .template-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      display: flex;
-      flex-direction: column;
-    }
-
-    .template-card-header {
-      padding: 14px 18px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-shrink: 0;
-    }
-
-    .template-card-title {
-      font-size: 12px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: var(--text-3);
-    }
-
+    /* ── Template tab ── */
     .template-body {
-      padding: 16px 18px;
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 24px 20px;
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 10px;
     }
+
+    .template-body::-webkit-scrollbar { width: 6px; }
+    .template-body::-webkit-scrollbar-track { background: transparent; }
+    .template-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 
     .panel-label {
       font-size: 11px;
@@ -442,7 +411,7 @@
       color: var(--text-3);
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
 
     .template-editor {
@@ -457,7 +426,7 @@
       resize: vertical;
       outline: none;
       line-height: 1.6;
-      min-height: 160px;
+      min-height: 200px;
       transition: border-color 0.15s;
     }
 
@@ -488,6 +457,56 @@
       background: #3b4480;
     }
 
+    .char-count {
+      font-size: 11px;
+      color: var(--text-3);
+      text-align: right;
+      margin-top: 4px;
+    }
+
+    .char-count.warn { color: var(--warning); }
+    .char-count.over { color: var(--error); }
+
+    /* ── Preview tab ── */
+    .preview-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 24px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .preview-body::-webkit-scrollbar { width: 6px; }
+    .preview-body::-webkit-scrollbar-track { background: transparent; }
+    .preview-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    .preview-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .preview-header .panel-label { margin-bottom: 0; }
+
+    .btn-copy-preview {
+      background: var(--bg-hover);
+      color: var(--text-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 10px;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .btn-copy-preview:hover {
+      background: var(--bg-selected);
+      color: var(--text-1);
+    }
+
     .preview-box {
       background: var(--bg-input);
       border: 1px solid var(--border);
@@ -496,8 +515,6 @@
       font-size: 13px;
       line-height: 1.6;
       min-height: 80px;
-      max-height: 280px;
-      overflow-y: auto;
       white-space: pre-wrap;
       word-break: break-word;
       color: var(--text-1);
@@ -509,38 +526,61 @@
       font-style: italic;
     }
 
-    .preview-box::-webkit-scrollbar {
-      width: 4px;
+    /* ── Card tabs ── */
+    .card-tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      background: var(--bg-card);
     }
 
-    .preview-box::-webkit-scrollbar-thumb {
-      background: var(--border);
-      border-radius: 4px;
-    }
-
-    .char-count {
-      font-size: 11px;
+    .card-tab {
+      padding: 12px 20px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
       color: var(--text-3);
-      text-align: right;
-      margin-top: 4px;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: color 0.15s, border-color 0.15s;
+      user-select: none;
     }
 
-    .char-count.warn {
-      color: var(--warning);
+    .card-tab:hover { color: var(--text-2); }
+
+    .card-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
     }
 
-    .char-count.over {
-      color: var(--error);
+    .card-tab-panel {
+      display: none;
+      flex: 1;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    .card-tab-panel.active {
+      display: flex;
+      flex-direction: column;
     }
 
     /* ── Discord send section ── */
-    .send-section {
+    .send-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 24px 20px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
-      padding: 16px 18px;
-      border-top: 1px solid var(--border);
+      gap: 12px;
     }
+
+    .send-body::-webkit-scrollbar { width: 6px; }
+    .send-body::-webkit-scrollbar-track { background: transparent; }
+    .send-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 
     .send-section-title {
       font-size: 11px;
@@ -584,87 +624,23 @@
       width: 100%;
     }
 
-    .form-input:focus {
-      border-color: var(--accent);
-    }
-
-    .toggle-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px 12px;
-      background: var(--bg-input);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-    }
-
-    .toggle-label {
-      font-size: 13px;
-      color: var(--text-2);
-      font-weight: 500;
-    }
-
-    .toggle-sub {
-      font-size: 11px;
-      color: var(--text-3);
-      margin-top: 1px;
-    }
-
-    .toggle {
-      position: relative;
-      width: 40px;
-      height: 22px;
-      background: var(--border);
-      border-radius: 11px;
-      cursor: pointer;
-      transition: background 0.2s;
-      flex-shrink: 0;
-    }
-
-    .toggle.on {
-      background: var(--accent);
-    }
-
-    .toggle::after {
-      content: '';
-      position: absolute;
-      top: 3px;
-      left: 3px;
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      background: #fff;
-      transition: transform 0.2s;
-    }
-
-    .toggle.on::after {
-      transform: translateX(18px);
-    }
-
-    .thread-options {
-      display: none;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .thread-options.visible {
-      display: flex;
-    }
+    .form-input:focus { border-color: var(--accent); }
 
     .send-actions {
       display: flex;
       align-items: center;
       gap: 12px;
+      padding-top: 4px;
     }
 
-    .send-actions .btn {
-      padding: 10px 20px;
-    }
+    .send-actions .btn { padding: 10px 20px; }
 
     .send-status {
       font-size: 12px;
       color: var(--text-3);
     }
+
+
 
     /* ── Toast ── */
     .toast-container {
@@ -852,42 +828,48 @@
     let filteredData = [];
     let currentIndex = -1;
     let selectedIndices = new Set();
-    let threadOn = false;
+    let activeTab = 'fields'; // 'fields' | 'template' | 'preview' | 'webhook'
 
     const LS_URL_KEY = 'listreviewer_url';
     const LS_TPL_KEY = 'listreviewer_template';
     const LS_WH_KEY   = 'listreviewer_webhook';
     const LS_WH_USER  = 'listreviewer_wh_user';
     const LS_WH_TNAME = 'listreviewer_wh_tname';
-    const LS_WH_CID   = 'listreviewer_wh_cid';
-    const LS_WH_THREAD = 'listreviewer_wh_thread';
 
-    // ─── Date Parsing ─────────────────────────────────────────────────────────────
+    // ─── Date helpers ─────────────────────────────────────────────────────────────
+    // Returns a Unix timestamp (seconds) if the value looks like a parseable ISO date, else null.
+    function toUnixSeconds(val) {
+      if (val === null || val === undefined) return null;
+      const s = String(val).trim();
+      // ISO datetime: 2024-01-15T10:30:00Z  or  2024-01-15T10:30:00+03:00
+      if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(s)) {
+        const ms = Date.parse(s);
+        if (!isNaN(ms)) return Math.floor(ms / 1000);
+      }
+      // ISO date only: 2024-01-15 → treat as UTC midnight
+      if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+        const ms = Date.parse(s + 'T00:00:00Z');
+        if (!isNaN(ms)) return Math.floor(ms / 1000);
+      }
+      return null;
+    }
+
     function formatDate(str) {
       if (!str && str !== 0) return '';
       const s = String(str).trim();
-
-      // Year only: 4 digits
       if (/^\d{4}$/.test(s)) return s;
-
-      // ISO datetime e.g. 2024-01-15T...
       if (/^\d{4}-\d{2}-\d{2}T/.test(s)) {
         try { return new Date(s).toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: '2-digit' }); } catch { }
       }
-
-      // ISO date only e.g. 2024-01-15
       if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
         try { return new Date(s + 'T00:00:00').toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: '2-digit' }); } catch { }
       }
-
-      // Slash date e.g. 15/01/2024 or 01/15/2024
       if (/^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(s)) {
         try {
           const d = new Date(s);
           if (!isNaN(d)) return d.toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: '2-digit' });
         } catch { }
       }
-
       return s;
     }
 
@@ -902,11 +884,16 @@
     }
 
     // ─── Build variable map from one row (index-keyed) ───────────────────────────
+    // ISO dates are converted to Discord timestamp syntax: <t:UNIX:F>
     function buildVarValues(row) {
       const vals = {};
       row.forEach((v, i) => {
-        const display = looksLikeDate(v) ? formatDate(v) : (v !== null && v !== undefined ? String(v) : '');
-        vals[String(i)] = display;
+        const unix = toUnixSeconds(v);
+        if (unix !== null) {
+          vals[String(i)] = `<t:${unix}:F>`;
+        } else {
+          vals[String(i)] = (v !== null && v !== undefined) ? String(v) : '';
+        }
       });
       return vals;
     }
@@ -944,9 +931,6 @@
         if (whUEl) localStorage.setItem(LS_WH_USER, whUEl.value);
         const tnEl = document.getElementById('threadName');
         if (tnEl) localStorage.setItem(LS_WH_TNAME, tnEl.value);
-        const cidEl = document.getElementById('channelId');
-        if (cidEl) localStorage.setItem(LS_WH_CID, cidEl.value);
-        localStorage.setItem(LS_WH_THREAD, threadOn ? '1' : '0');
       } catch { }
     }
 
@@ -963,13 +947,9 @@
         const wh    = localStorage.getItem(LS_WH_KEY);
         const whU   = localStorage.getItem(LS_WH_USER);
         const tName = localStorage.getItem(LS_WH_TNAME);
-        const cid   = localStorage.getItem(LS_WH_CID);
-        const tOn   = localStorage.getItem(LS_WH_THREAD);
         if (wh)    document.getElementById('webhookUrl').value = wh;
         if (whU)   document.getElementById('webhookUsername').value = whU;
         if (tName) document.getElementById('threadName').value = tName;
-        if (cid)   document.getElementById('channelId').value = cid;
-        if (tOn === '1' && !threadOn) toggleThread();
       } catch { }
     }
 
@@ -997,9 +977,18 @@
           columns = data[0].map(c => c !== null && c !== undefined ? String(c) : '');
           allData = data.slice(1);
         } else {
-          // Array of objects fallback: use key names as columns, values as rows
-          columns = data.length ? Object.keys(data[0]) : [];
-          allData = data.map(obj => columns.map(k => obj[k] ?? ''));
+          // Array of objects: preserve insertion order; duplicate keys get separate columns
+          const allKeys = [];
+          data.forEach(obj => {
+            Object.keys(obj).forEach(k => { if (!allKeys.includes(k)) allKeys.push(k); });
+          });
+          columns = allKeys;
+          allData = data.map(obj => {
+            // Walk entries in the order they appear in this object
+            const entries = Object.entries(obj);
+            // Build row positionally: for each expected column slot use the value if present
+            return allKeys.map(k => obj.hasOwnProperty(k) ? obj[k] ?? '' : '');
+          });
         }
 
         filteredData = [...allData];
@@ -1093,99 +1082,98 @@
       const main = document.getElementById('mainPanel');
       const label = getItemLabel(row);
 
-      let fieldsHtml = row.map((v, i) => {
+      const fieldsHtml = row.map((v, i) => {
         const colLabel = columns[i] || `Column ${i}`;
         const val = v !== null && v !== undefined ? String(v) : '';
         const isEmpty = val.trim() === '';
         const display = looksLikeDate(v) ? formatDate(v) : val;
         return `<div class="qa-item">
-      <div class="qa-question">${escapeHtml(colLabel)}</div>
-      <div class="qa-answer${isEmpty ? ' empty' : ''}">${isEmpty ? '(empty)' : escapeHtml(display)}</div>
-    </div>`;
+          <div class="qa-question">${escapeHtml(colLabel)}</div>
+          <div class="qa-answer${isEmpty ? ' empty' : ''}">${isEmpty ? '(empty)' : escapeHtml(display)}</div>
+        </div>`;
       }).join('');
 
-      let html = `
-    <div class="detail-card">
-      <div class="detail-card-header">
-        <div class="detail-card-title">${escapeHtml(label)}</div>
-      </div>
-      <div class="fields-grid">
-        ${fieldsHtml}
-      </div>
-    </div>
+      const html = `
+      <div class="content-card">
+        <div class="card-tabs">
+          <div class="card-tab" id="tab-fields"    onclick="switchTab('fields')">Fields</div>
+          <div class="card-tab" id="tab-template"  onclick="switchTab('template')">Template</div>
+          <div class="card-tab" id="tab-preview"   onclick="switchTab('preview')">Preview</div>
+          <div class="card-tab" id="tab-webhook"   onclick="switchTab('webhook')">Webhook</div>
+        </div>
 
-    <div class="template-card">
-      <div class="template-card-header">
-        <span class="template-card-title">Template &amp; Send</span>
-      </div>
-      <div class="template-body">
-
-        <div>
-          <div class="panel-label">Message Template</div>
-          <textarea class="template-editor" id="templateEditor"
-            placeholder="Write your template here. Use {{variable}} placeholders."
-            oninput="renderPreview(); updateCharCount(); saveToStorage()"></textarea>
-          <div class="char-count" id="charCount">0 / 2000</div>
-          <div class="vars-hint" style="margin-top:8px;">
-            <div style="margin-bottom:5px;font-size:11px;color:var(--text-3);font-weight:600;">AVAILABLE VARIABLES — click to insert</div>
-            <div id="varTags"></div>
+        <!-- Fields tab -->
+        <div class="card-tab-panel" id="panel-fields">
+          <div class="fields-header">
+            <div class="fields-title">${escapeHtml(label)}</div>
+          </div>
+          <div class="fields-scroll">
+            ${fieldsHtml}
           </div>
         </div>
 
-        <div class="divider"></div>
-
-        <div>
-          <div class="panel-label">Preview</div>
-          <div class="preview-box empty-preview" id="previewBox">Write a template above to see a preview.</div>
-        </div>
-
-      </div>
-
-      <div class="send-section">
-        <div class="send-section-title">Send to Discord</div>
-        <div class="send-row">
-          <div class="form-row">
-            <label>Webhook URL</label>
-            <input class="form-input" type="text" id="webhookUrl" placeholder="https://discord.com/api/webhooks/…" oninput="saveToStorage()" />
-          </div>
-          <div class="form-row" style="max-width:160px;">
-            <label>Bot Username</label>
-            <input class="form-input" type="text" id="webhookUsername" placeholder="Optional" oninput="saveToStorage()" />
+        <!-- Template tab -->
+        <div class="card-tab-panel" id="panel-template">
+          <div class="template-body">
+            <div>
+              <div class="panel-label">Available Variables — click to insert</div>
+              <div class="vars-hint"><div id="varTags"></div></div>
+            </div>
+            <div>
+              <textarea class="template-editor" id="templateEditor"
+                placeholder="Write your template here. Use {{0}}, {{1}}, … placeholders."
+                oninput="renderPreview(); updateCharCount(); saveToStorage()"></textarea>
+              <div class="char-count" id="charCount">0 / 2000</div>
+            </div>
           </div>
         </div>
 
-        <div class="toggle-row">
-          <div>
-            <div class="toggle-label">Send as Thread</div>
-            <div class="toggle-sub">Create a new thread per message</div>
-          </div>
-          <div class="toggle" id="threadToggle" onclick="toggleThread()"></div>
-        </div>
-
-        <div class="thread-options" id="threadOptions">
-          <div class="form-row">
-            <label>Thread Name</label>
-            <input class="form-input" type="text" id="threadName" placeholder="Entry – {{0}}" oninput="saveToStorage()" />
-          </div>
-          <div class="form-row">
-            <label>Channel ID</label>
-            <input class="form-input" type="text" id="channelId" placeholder="123456789012345678" oninput="saveToStorage()" />
-            <span style="font-size:11px;color:var(--text-3);margin-top:3px;">Right-click channel → Copy ID.</span>
+        <!-- Preview tab -->
+        <div class="card-tab-panel" id="panel-preview">
+          <div class="preview-body">
+            <div class="preview-header">
+              <div class="panel-label">Preview</div>
+              <button class="btn-copy-preview" id="copyPreviewBtn" onclick="copyPreview()">Copy</button>
+            </div>
+            <div class="preview-box empty-preview" id="previewBox">Write a template to see a preview.</div>
           </div>
         </div>
 
-        <div class="send-actions">
-          <button class="btn btn-success" id="sendBtn" onclick="sendToDiscord()">
-            <span id="sendBtnContent">↑ Send Selected to Discord</span>
-          </button>
-          <span class="send-status" id="sendStatus"></span>
+        <!-- Webhook & Send tab -->
+        <div class="card-tab-panel" id="panel-webhook">
+          <div class="send-body">
+            <div class="send-section-title">Discord Webhook</div>
+            <div class="send-row">
+              <div class="form-row">
+                <label>Webhook URL</label>
+                <input class="form-input" type="text" id="webhookUrl" placeholder="https://discord.com/api/webhooks/…" oninput="saveToStorage()" />
+              </div>
+              <div class="form-row" style="max-width:160px;">
+                <label>Bot Username</label>
+                <input class="form-input" type="text" id="webhookUsername" placeholder="Optional" oninput="saveToStorage()" />
+              </div>
+            </div>
+            <div class="form-row">
+              <label>Thread Name</label>
+              <input class="form-input" type="text" id="threadName" placeholder="Entry – {{0}}" oninput="saveToStorage()" />
+            </div>
+            <div class="send-actions">
+              <button class="btn btn-success" id="sendBtn" onclick="sendToDiscord()">
+                <span id="sendBtnContent">↑ Send Selected to Discord</span>
+              </button>
+              <span class="send-status" id="sendStatus"></span>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>`;
+
+      </div>`;
 
       main.innerHTML = html;
 
-      // Restore saved template and all Discord settings now that the elements exist
+      // Apply active tab
+      switchTab(activeTab);
+
+      // Restore saved template and Discord settings
       try {
         const tpl = localStorage.getItem(LS_TPL_KEY);
         if (tpl) document.getElementById('templateEditor').value = tpl;
@@ -1251,17 +1239,113 @@
       const n = (currentIndex >= 0 && allData[currentIndex])
         ? applyTemplate(tmpl, allData[currentIndex]).length
         : tmpl.length;
-      el.textContent = `${n} / 2000`;
-      el.className = 'char-count' + (n > 2000 ? ' over' : n > 1800 ? ' warn' : '');
+      const parts = Math.ceil(n / 2000);
+      el.textContent = parts > 1 ? `${n} chars · will split into ${parts} messages` : `${n} / 2000`;
+      el.className = 'char-count' + (n > 2000 ? ' warn' : n > 1800 ? ' warn' : '');
     }
 
-    // ─── Thread toggle ─────────────────────────────────────────────────────────────
-    function toggleThread() {
-      threadOn = !threadOn;
-      const tog = document.getElementById('threadToggle');
-      const opts = document.getElementById('threadOptions');
-      if (tog) tog.classList.toggle('on', threadOn);
-      if (opts) opts.classList.toggle('visible', threadOn);
+    // ─── Tab switching ─────────────────────────────────────────────────────────────
+    function switchTab(name) {
+      activeTab = name;
+      ['fields', 'template', 'preview', 'webhook'].forEach(t => {
+        const tab = document.getElementById('tab-' + t);
+        const panel = document.getElementById('panel-' + t);
+        if (tab) tab.classList.toggle('active', t === name);
+        if (panel) panel.classList.toggle('active', t === name);
+      });
+    }
+
+    // ─── Copy preview ──────────────────────────────────────────────────────────────
+    function copyPreview() {
+      const preview = document.getElementById('previewBox');
+      if (!preview) return;
+      const text = preview.textContent;
+      if (!text || preview.classList.contains('empty-preview')) return;
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById('copyPreviewBtn');
+        if (btn) { btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = 'Copy', 1500); }
+      }).catch(() => showToast('error', 'Copy failed', 'Could not access clipboard.'));
+    }
+
+    // ─── Split long message (code-block aware) ─────────────────────────────────────
+    /**
+     * Split a message into chunks of at most maxLen characters.
+     * Never splits inside a fenced code block (``` ... ```).
+     * Tries to split at paragraph boundaries, then line boundaries, then words.
+     */
+    function splitMessage(text, maxLen = 2000) {
+      if (text.length <= maxLen) return [text];
+
+      const chunks = [];
+
+      // We track whether we're inside a code block as we consume text
+      function safeSplit(remaining) {
+        if (remaining.length <= maxLen) { chunks.push(remaining); return; }
+
+        // Walk forward up to maxLen chars. Track open code fences.
+        let inCode = false;
+        let fenceChar = '';
+        let i = 0;
+        let lastSafeBreak = -1; // index of last safe split point outside a code block
+
+        while (i < maxLen && i < remaining.length) {
+          // Detect ``` fence (3 or more backticks)
+          if (!inCode && remaining[i] === '`' && remaining.slice(i, i + 3) === '```') {
+            inCode = true;
+            fenceChar = '`';
+            i += 3;
+            // skip to end of opening fence line
+            while (i < remaining.length && remaining[i] !== '\n') i++;
+            continue;
+          }
+          if (inCode && remaining[i] === '`' && remaining.slice(i, i + 3) === '```') {
+            inCode = false;
+            i += 3;
+            // closing fence — the newline after is a safe break
+            if (i < remaining.length && remaining[i] === '\n') {
+              i++;
+              if (!inCode) lastSafeBreak = i;
+            }
+            continue;
+          }
+
+          if (!inCode) {
+            // Paragraph break (double newline)
+            if (remaining[i] === '\n' && remaining[i + 1] === '\n') {
+              lastSafeBreak = i + 2;
+            }
+            // Single newline
+            else if (remaining[i] === '\n') {
+              lastSafeBreak = i + 1;
+            }
+            // Space (word boundary)
+            else if (remaining[i] === ' ') {
+              lastSafeBreak = i + 1;
+            }
+          }
+          i++;
+        }
+
+        let breakAt;
+        if (i >= remaining.length) {
+          // Remaining fits entirely
+          chunks.push(remaining);
+          return;
+        }
+
+        if (lastSafeBreak > 0) {
+          breakAt = lastSafeBreak;
+        } else {
+          // No safe break found (e.g. very long unbroken line) — force cut
+          breakAt = maxLen;
+        }
+
+        chunks.push(remaining.slice(0, breakAt));
+        safeSplit(remaining.slice(breakAt));
+      }
+
+      safeSplit(text);
+      return chunks;
     }
 
     // ─── Discord Send ─────────────────────────────────────────────────────────────
@@ -1286,9 +1370,7 @@
       const ta = document.getElementById('templateEditor');
       const tmpl = ta ? ta.value : '';
       const usernameOverride = (document.getElementById('webhookUsername') || {}).value?.trim() || '';
-      const useThread = threadOn;
       const threadNameTmpl = ((document.getElementById('threadName') || {}).value || '').trim();
-      const channelId = ((document.getElementById('channelId') || {}).value || '').trim();
 
       // Save webhook
       try { localStorage.setItem(LS_WH_KEY, webhook); } catch { }
@@ -1299,29 +1381,22 @@
       document.getElementById('sendBtnContent').innerHTML = '<span class="spinner-inline"></span> Sending…';
 
       let sent = 0, failed = 0;
+
       for (const item of targets) {
         const content = applyTemplate(tmpl, item);
-        if (content.length > 2000) {
-          showToast('error', 'Message too long', `Message for "${getItemLabel(item)}" exceeds 2000 chars (${content.length}). Skipped.`);
-          failed++;
-          continue;
-        }
+        const parts = splitMessage(content, 2000);
+        const tName = applyTemplate(threadNameTmpl || 'Entry', item).slice(0, 100);
 
-        const payload = { content };
-        if (usernameOverride) payload.username = usernameOverride;
+        // First message: creates the forum thread (includes thread_name)
+        const firstPayload = { content: parts[0], thread_name: tName };
+        if (usernameOverride) firstPayload.username = usernameOverride;
 
-        if (useThread) {
-          if (!channelId) { showToast('error', 'Missing Channel ID', 'Enter a Channel ID to create threads.'); failed++; continue; }
-          const tName = applyTemplate(threadNameTmpl || 'Entry', item).slice(0, 100);
-          payload.thread_name = tName;
-        }
-
+        let threadId = null;
         try {
-          const url = useThread && channelId ? `${webhook}?thread_id=${channelId}` : webhook;
-          const res = await fetch(url, {
+          const res = await fetch(webhook + '?wait=true', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload),
+            body: JSON.stringify(firstPayload),
           });
 
           if (!res.ok) {
@@ -1333,11 +1408,40 @@
             } catch { }
             throw new Error(errMsg);
           }
+
+          const resData = await res.json();
+          // Discord returns the thread id either as channel_id (forum threads) or in the message object
+          threadId = resData.channel_id || resData.id || null;
           sent++;
           if (status) status.textContent = `Sent ${sent}/${targets.length}…`;
         } catch (e) {
           showToast('error', `Failed (${getItemLabel(item)})`, e.message);
           failed++;
+          if (targets.length > 1) await new Promise(r => setTimeout(r, 750));
+          continue;
+        }
+
+        // Subsequent parts: reply into the same thread
+        for (let p = 1; p < parts.length; p++) {
+          const followPayload = { content: parts[p] };
+          if (usernameOverride) followPayload.username = usernameOverride;
+
+          const followUrl = threadId ? `${webhook}?thread_id=${threadId}&wait=true` : webhook + '?wait=true';
+          try {
+            const res = await fetch(followUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(followPayload),
+            });
+            if (!res.ok) {
+              let errMsg = `HTTP ${res.status}`;
+              try { const d = await res.json(); errMsg = d.message || errMsg; } catch { }
+              throw new Error(errMsg);
+            }
+          } catch (e) {
+            showToast('warning', `Part ${p + 1} failed (${getItemLabel(item)})`, e.message);
+          }
+          await new Promise(r => setTimeout(r, 500));
         }
 
         if (targets.length > 1) await new Promise(r => setTimeout(r, 750));
