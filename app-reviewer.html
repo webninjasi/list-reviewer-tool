@@ -1,0 +1,1381 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>List Reviewer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg-base: #1e1f22;
+      --bg-card: #2b2d31;
+      --bg-input: #1e1f22;
+      --bg-hover: #35373c;
+      --bg-selected: #404249;
+      --border: #3f4147;
+      --accent: #5865f2;
+      --accent-dim: #4752c4;
+      --success: #57f287;
+      --error: #ed4245;
+      --warning: #faa61a;
+      --text-1: #f2f3f5;
+      --text-2: #b5bac1;
+      --text-3: #80848e;
+      --radius: 8px;
+      --radius-lg: 12px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-base);
+      color: var(--text-1);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── Top Bar ── */
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 20px;
+      height: 56px;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      z-index: 10;
+    }
+
+    .topbar-logo {
+      font-weight: 700;
+      font-size: 16px;
+      color: var(--text-1);
+      letter-spacing: -0.3px;
+      white-space: nowrap;
+    }
+
+    .topbar-logo span {
+      color: var(--accent);
+    }
+
+    .topbar-sep {
+      width: 1px;
+      height: 24px;
+      background: var(--border);
+      flex-shrink: 0;
+    }
+
+    .topbar-url-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+    }
+
+    .topbar-url-group label {
+      font-size: 12px;
+      color: var(--text-3);
+      white-space: nowrap;
+      font-weight: 500;
+    }
+
+    .topbar-url-group input {
+      flex: 1;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-1);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      padding: 6px 10px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .topbar-url-group input:focus {
+      border-color: var(--accent);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      border-radius: var(--radius);
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: background 0.15s, opacity 0.15s;
+      white-space: nowrap;
+    }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn-primary:not(:disabled):hover {
+      background: var(--accent-dim);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-2);
+      border: 1px solid var(--border);
+    }
+
+    .btn-ghost:not(:disabled):hover {
+      background: var(--bg-hover);
+      color: var(--text-1);
+    }
+
+    .btn-success {
+      background: #248046;
+      color: #fff;
+    }
+
+    .btn-success:not(:disabled):hover {
+      background: #1a6334;
+    }
+
+    .topbar-actions {
+      margin-left: auto;
+      display: flex;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    /* ── Layout ── */
+    .layout {
+      display: grid;
+      grid-template-columns: 270px 1fr;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      background: var(--bg-card);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .sidebar-header {
+      padding: 14px 16px 10px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .sidebar-header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .sidebar-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-3);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    .badge {
+      background: var(--bg-hover);
+      color: var(--text-2);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 10px;
+    }
+
+    .sidebar-search {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-1);
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      padding: 6px 10px;
+      width: 100%;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .sidebar-search:focus {
+      border-color: var(--accent);
+    }
+
+    .sidebar-actions {
+      display: flex;
+      gap: 6px;
+      padding: 8px 16px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .sidebar-actions .btn {
+      flex: 1;
+      justify-content: center;
+      font-size: 11px;
+      padding: 5px 8px;
+    }
+
+    .sidebar-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 6px 8px;
+    }
+
+    .sidebar-list::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .sidebar-list::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .sidebar-list::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+
+    .item-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 9px 10px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: background 0.1s;
+      margin-bottom: 2px;
+    }
+
+    .item-row:hover {
+      background: var(--bg-hover);
+    }
+
+    .item-row.active {
+      background: var(--bg-selected);
+    }
+
+    .item-checkbox {
+      margin-top: 2px;
+      width: 15px;
+      height: 15px;
+      accent-color: var(--accent);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .item-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .item-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-1);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .item-meta {
+      font-size: 11px;
+      color: var(--text-3);
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ── Main Panel ── */
+    .main {
+      overflow-y: auto;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      min-height: 0;
+      /* grid child fix: allow cell to be smaller than content */
+    }
+
+    .main::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .main::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .main::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+
+    /* ── Item Detail Card ── */
+    .detail-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+    }
+
+    .detail-card-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .detail-card-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-1);
+    }
+
+    .detail-card-sub {
+      font-size: 12px;
+      color: var(--text-3);
+      margin-top: 3px;
+    }
+
+    .fields-grid {
+      padding: 8px 18px 16px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .qa-item {
+      padding: 11px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .qa-item:last-child {
+      border-bottom: none;
+    }
+
+    .qa-question {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-3);
+      margin-bottom: 5px;
+      line-height: 1.5;
+    }
+
+    .qa-answer {
+      font-size: 13px;
+      color: var(--text-1);
+      line-height: 1.6;
+      background: var(--bg-input);
+      border-radius: 6px;
+      padding: 8px 12px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .qa-answer.empty {
+      color: var(--text-3);
+      font-style: italic;
+    }
+
+    /* ── Template / Send Card ── */
+    .template-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .template-card-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .template-card-title {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-3);
+    }
+
+    .template-body {
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .panel-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-3);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .template-editor {
+      width: 100%;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-1);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      padding: 10px;
+      resize: vertical;
+      outline: none;
+      line-height: 1.6;
+      min-height: 160px;
+      transition: border-color 0.15s;
+    }
+
+    .template-editor:focus {
+      border-color: var(--accent);
+    }
+
+    .vars-hint {
+      font-size: 11px;
+      color: var(--text-3);
+      line-height: 1.6;
+    }
+
+    .var-tag {
+      display: inline-block;
+      background: #2d3561;
+      color: #8b9cf7;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      padding: 1px 5px;
+      border-radius: 4px;
+      margin: 2px 2px 0 0;
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+
+    .var-tag:hover {
+      background: #3b4480;
+    }
+
+    .preview-box {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px;
+      font-size: 13px;
+      line-height: 1.6;
+      min-height: 80px;
+      max-height: 280px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      color: var(--text-1);
+      font-family: 'Inter', sans-serif;
+    }
+
+    .preview-box.empty-preview {
+      color: var(--text-3);
+      font-style: italic;
+    }
+
+    .preview-box::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .preview-box::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+
+    .char-count {
+      font-size: 11px;
+      color: var(--text-3);
+      text-align: right;
+      margin-top: 4px;
+    }
+
+    .char-count.warn {
+      color: var(--warning);
+    }
+
+    .char-count.over {
+      color: var(--error);
+    }
+
+    /* ── Discord send section ── */
+    .send-section {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 16px 18px;
+      border-top: 1px solid var(--border);
+    }
+
+    .send-section-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-3);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .send-row {
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+    }
+
+    .form-row {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+    }
+
+    .form-row label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-3);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-input {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-1);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      padding: 8px 10px;
+      outline: none;
+      transition: border-color 0.15s;
+      width: 100%;
+    }
+
+    .form-input:focus {
+      border-color: var(--accent);
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+
+    .toggle-label {
+      font-size: 13px;
+      color: var(--text-2);
+      font-weight: 500;
+    }
+
+    .toggle-sub {
+      font-size: 11px;
+      color: var(--text-3);
+      margin-top: 1px;
+    }
+
+    .toggle {
+      position: relative;
+      width: 40px;
+      height: 22px;
+      background: var(--border);
+      border-radius: 11px;
+      cursor: pointer;
+      transition: background 0.2s;
+      flex-shrink: 0;
+    }
+
+    .toggle.on {
+      background: var(--accent);
+    }
+
+    .toggle::after {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #fff;
+      transition: transform 0.2s;
+    }
+
+    .toggle.on::after {
+      transform: translateX(18px);
+    }
+
+    .thread-options {
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .thread-options.visible {
+      display: flex;
+    }
+
+    .send-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .send-actions .btn {
+      padding: 10px 20px;
+    }
+
+    .send-status {
+      font-size: 12px;
+      color: var(--text-3);
+    }
+
+    /* ── Toast ── */
+    .toast-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      z-index: 999;
+    }
+
+    .toast {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      font-size: 13px;
+      min-width: 280px;
+      max-width: 400px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+      animation: slideIn 0.2s ease;
+      cursor: pointer;
+    }
+
+    .toast.success {
+      border-left: 3px solid var(--success);
+    }
+
+    .toast.error {
+      border-left: 3px solid var(--error);
+    }
+
+    .toast.warning {
+      border-left: 3px solid var(--warning);
+    }
+
+    .toast-icon {
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .toast-msg {
+      color: var(--text-2);
+      line-height: 1.5;
+    }
+
+    .toast-msg strong {
+      color: var(--text-1);
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    /* ── Empty state ── */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      gap: 12px;
+      padding: 40px;
+      text-align: center;
+    }
+
+    .empty-state-icon {
+      font-size: 48px;
+      opacity: 0.3;
+    }
+
+    .empty-state-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-2);
+    }
+
+    .empty-state-sub {
+      font-size: 13px;
+      color: var(--text-3);
+      max-width: 280px;
+      line-height: 1.5;
+    }
+
+    /* ── Utility ── */
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .spinner-inline {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Top Bar -->
+  <div class="topbar">
+    <div class="topbar-logo">List<span>Reviewer</span></div>
+    <div class="topbar-sep"></div>
+    <div class="topbar-url-group">
+      <label>JSON URL</label>
+      <input type="text" id="jsonUrl" placeholder="https://example.com/data.json" />
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-primary" id="loadBtn" onclick="loadData()">
+        <span id="loadBtnContent">Load</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Layout -->
+  <div class="layout">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-header-top">
+          <span class="sidebar-title">Items</span>
+          <span class="badge" id="countBadge">0</span>
+        </div>
+        <input class="sidebar-search" type="text" id="searchInput" placeholder="Search…" oninput="filterList()" />
+      </div>
+      <div class="sidebar-actions">
+        <button class="btn btn-ghost" id="selectAllBtn" onclick="selectAllVisible()"
+          title="Select all visible">All</button>
+        <button class="btn btn-ghost" id="selectNoneBtn" onclick="selectNone()" title="Deselect all">None</button>
+        <span id="selectionLabel" style="font-size:11px;color:var(--text-3);align-self:center;margin-left:2px;"></span>
+      </div>
+      <div class="sidebar-list" id="sidebarList">
+        <div class="empty-state" style="padding: 30px 16px;">
+          <div class="empty-state-icon">📋</div>
+          <div class="empty-state-title">No items</div>
+          <div class="empty-state-sub">Enter a JSON URL above and click Load to get started.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Panel -->
+    <div class="main" id="mainPanel">
+      <div class="empty-state">
+        <div class="empty-state-icon">👈</div>
+        <div class="empty-state-title">Select an item</div>
+        <div class="empty-state-sub">Choose an item from the sidebar to view its fields.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Toast container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script>
+    // ─── State ────────────────────────────────────────────────────────────────────
+    let allData = [];      // array of row-arrays (no header)
+    let columns = [];      // column names from first row
+    let filteredData = [];
+    let currentIndex = -1;
+    let selectedIndices = new Set();
+    let threadOn = false;
+
+    const LS_URL_KEY = 'listreviewer_url';
+    const LS_TPL_KEY = 'listreviewer_template';
+    const LS_WH_KEY   = 'listreviewer_webhook';
+    const LS_WH_USER  = 'listreviewer_wh_user';
+    const LS_WH_TNAME = 'listreviewer_wh_tname';
+    const LS_WH_CID   = 'listreviewer_wh_cid';
+    const LS_WH_THREAD = 'listreviewer_wh_thread';
+
+    // ─── Date Parsing ─────────────────────────────────────────────────────────────
+    function formatDate(str) {
+      if (!str && str !== 0) return '';
+      const s = String(str).trim();
+
+      // Year only: 4 digits
+      if (/^\d{4}$/.test(s)) return s;
+
+      // ISO datetime e.g. 2024-01-15T...
+      if (/^\d{4}-\d{2}-\d{2}T/.test(s)) {
+        try { return new Date(s).toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: '2-digit' }); } catch { }
+      }
+
+      // ISO date only e.g. 2024-01-15
+      if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+        try { return new Date(s + 'T00:00:00').toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: '2-digit' }); } catch { }
+      }
+
+      // Slash date e.g. 15/01/2024 or 01/15/2024
+      if (/^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(s)) {
+        try {
+          const d = new Date(s);
+          if (!isNaN(d)) return d.toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: '2-digit' });
+        } catch { }
+      }
+
+      return s;
+    }
+
+    function looksLikeDate(val) {
+      if (typeof val !== 'string' && typeof val !== 'number') return false;
+      const s = String(val).trim();
+      return (
+        /^\d{4}$/.test(s) ||
+        /^\d{4}-\d{2}-\d{2}(T.*)?$/.test(s) ||
+        /^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(s)
+      );
+    }
+
+    // ─── Build variable map from one row (index-keyed) ───────────────────────────
+    function buildVarValues(row) {
+      const vals = {};
+      row.forEach((v, i) => {
+        const display = looksLikeDate(v) ? formatDate(v) : (v !== null && v !== undefined ? String(v) : '');
+        vals[String(i)] = display;
+      });
+      return vals;
+    }
+
+    // ─── Apply template ────────────────────────────────────────────────────────────
+    function applyTemplate(template, row) {
+      const vals = buildVarValues(row);
+      return template.replace(/\{\{([^}]+)\}\}/g, (_, key) => {
+        const k = key.trim();
+        return (k in vals) ? vals[k] : `{{${k}}}`;
+      });
+    }
+
+    // ─── Get display name / subtitle for a row ────────────────────────────────────
+    function getItemLabel(row) {
+      const v = row[0];
+      return (v !== null && v !== undefined && String(v).trim()) ? String(v).trim() : 'Item';
+    }
+
+    function getItemSub(row) {
+      const v = row[1];
+      return (v !== null && v !== undefined && String(v).trim()) ? String(v).trim().slice(0, 60) : '';
+    }
+
+    // ─── LocalStorage ─────────────────────────────────────────────────────────────
+    function saveToStorage() {
+      try {
+        const urlEl = document.getElementById('jsonUrl');
+        if (urlEl) localStorage.setItem(LS_URL_KEY, urlEl.value);
+        const tplEl = document.getElementById('templateEditor');
+        if (tplEl) localStorage.setItem(LS_TPL_KEY, tplEl.value);
+        const whEl = document.getElementById('webhookUrl');
+        if (whEl) localStorage.setItem(LS_WH_KEY, whEl.value);
+        const whUEl = document.getElementById('webhookUsername');
+        if (whUEl) localStorage.setItem(LS_WH_USER, whUEl.value);
+        const tnEl = document.getElementById('threadName');
+        if (tnEl) localStorage.setItem(LS_WH_TNAME, tnEl.value);
+        const cidEl = document.getElementById('channelId');
+        if (cidEl) localStorage.setItem(LS_WH_CID, cidEl.value);
+        localStorage.setItem(LS_WH_THREAD, threadOn ? '1' : '0');
+      } catch { }
+    }
+
+    function loadFromStorage() {
+      try {
+        const url = localStorage.getItem(LS_URL_KEY);
+        if (url) document.getElementById('jsonUrl').value = url;
+        // All other values are restored in renderMain() after the DOM is ready
+      } catch { }
+    }
+
+    function restoreDiscordSettings() {
+      try {
+        const wh    = localStorage.getItem(LS_WH_KEY);
+        const whU   = localStorage.getItem(LS_WH_USER);
+        const tName = localStorage.getItem(LS_WH_TNAME);
+        const cid   = localStorage.getItem(LS_WH_CID);
+        const tOn   = localStorage.getItem(LS_WH_THREAD);
+        if (wh)    document.getElementById('webhookUrl').value = wh;
+        if (whU)   document.getElementById('webhookUsername').value = whU;
+        if (tName) document.getElementById('threadName').value = tName;
+        if (cid)   document.getElementById('channelId').value = cid;
+        if (tOn === '1' && !threadOn) toggleThread();
+      } catch { }
+    }
+
+    // ─── Load Data ────────────────────────────────────────────────────────────────
+    async function loadData() {
+      const url = document.getElementById('jsonUrl').value.trim();
+      if (!url) { showToast('error', 'Missing URL', 'Please enter a JSON URL to load.'); return; }
+
+      saveToStorage();
+
+      const btn = document.getElementById('loadBtn');
+      document.getElementById('loadBtnContent').innerHTML = '<span class="spinner-inline"></span>';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
+        const data = await res.json();
+
+        if (!Array.isArray(data)) throw new Error('Expected a JSON array at the root level, but got: ' + typeof data);
+        if (data.length === 0) { showToast('warning', 'Empty list', 'The JSON loaded successfully but contains no items.'); }
+
+        // 2-D array: first row is column headers
+        if (Array.isArray(data[0])) {
+          columns = data[0].map(c => c !== null && c !== undefined ? String(c) : '');
+          allData = data.slice(1);
+        } else {
+          // Array of objects fallback: use key names as columns, values as rows
+          columns = data.length ? Object.keys(data[0]) : [];
+          allData = data.map(obj => columns.map(k => obj[k] ?? ''));
+        }
+
+        filteredData = [...allData];
+        selectedIndices.clear();
+        currentIndex = -1;
+        renderSidebar();
+        showToast('success', 'Loaded', `${allData.length} row${allData.length !== 1 ? 's' : ''} loaded (${columns.length} columns).`);
+      } catch (e) {
+        showToast('error', 'Load failed', e.message);
+      } finally {
+        document.getElementById('loadBtnContent').textContent = 'Load';
+        btn.disabled = false;
+      }
+    }
+
+    // ─── Sidebar ──────────────────────────────────────────────────────────────────
+    function renderSidebar() {
+      const list = document.getElementById('sidebarList');
+      document.getElementById('countBadge').textContent = filteredData.length;
+      updateSelectionLabel();
+
+      if (filteredData.length === 0) {
+        list.innerHTML = '<div class="empty-state" style="padding:30px 16px;"><div class="empty-state-icon">🔍</div><div class="empty-state-title">No results</div><div class="empty-state-sub">Try a different search term.</div></div>';
+        return;
+      }
+
+      list.innerHTML = filteredData.map((item) => {
+        const realIdx = allData.indexOf(item);
+        const name = getItemLabel(item);
+        const sub = getItemSub(item);
+        const isActive = currentIndex === realIdx;
+        const isChecked = selectedIndices.has(realIdx);
+        return `<div class="item-row${isActive ? ' active' : ''}" onclick="selectItem(${realIdx}, event)">
+      <input type="checkbox" class="item-checkbox" id="chk-${realIdx}" ${isChecked ? 'checked' : ''}
+        onclick="toggleCheck(event, ${realIdx})" />
+      <div class="item-info">
+        <div class="item-name">${escapeHtml(name)}</div>
+        ${sub ? `<div class="item-meta">${escapeHtml(sub)}</div>` : ''}
+      </div>
+    </div>`;
+      }).join('');
+    }
+
+    function updateSelectionLabel() {
+      const el = document.getElementById('selectionLabel');
+      el.textContent = selectedIndices.size > 0 ? `${selectedIndices.size} selected` : '';
+    }
+
+    function toggleCheck(event, realIdx) {
+      event.stopPropagation();
+      if (selectedIndices.has(realIdx)) {
+        selectedIndices.delete(realIdx);
+      } else {
+        selectedIndices.add(realIdx);
+      }
+      updateSelectionLabel();
+      // update just this checkbox row without full re-render
+      const chk = document.getElementById(`chk-${realIdx}`);
+      if (chk) chk.checked = selectedIndices.has(realIdx);
+    }
+
+    function selectAllVisible() {
+      for (const item of filteredData) {
+        selectedIndices.add(allData.indexOf(item));
+      }
+      renderSidebar();
+    }
+
+    function selectNone() {
+      selectedIndices.clear();
+      renderSidebar();
+    }
+
+    function filterList() {
+      const q = document.getElementById('searchInput').value.toLowerCase();
+      filteredData = allData.filter(row => row.some(v => String(v ?? '').toLowerCase().includes(q)));
+      renderSidebar();
+    }
+
+    function selectItem(idx, event) {
+      // Clicking the row (not the checkbox) selects for preview
+      if (event && event.target.type === 'checkbox') return;
+      currentIndex = idx;
+      renderSidebar();
+      renderMain(allData[idx]);
+      renderPreview();
+    }
+
+    // ─── Main Panel ───────────────────────────────────────────────────────────────
+    function renderMain(row) {
+      const main = document.getElementById('mainPanel');
+      const label = getItemLabel(row);
+
+      let fieldsHtml = row.map((v, i) => {
+        const colLabel = columns[i] || `Column ${i}`;
+        const val = v !== null && v !== undefined ? String(v) : '';
+        const isEmpty = val.trim() === '';
+        const display = looksLikeDate(v) ? formatDate(v) : val;
+        return `<div class="qa-item">
+      <div class="qa-question">${escapeHtml(colLabel)}</div>
+      <div class="qa-answer${isEmpty ? ' empty' : ''}">${isEmpty ? '(empty)' : escapeHtml(display)}</div>
+    </div>`;
+      }).join('');
+
+      let html = `
+    <div class="detail-card">
+      <div class="detail-card-header">
+        <div class="detail-card-title">${escapeHtml(label)}</div>
+      </div>
+      <div class="fields-grid">
+        ${fieldsHtml}
+      </div>
+    </div>
+
+    <div class="template-card">
+      <div class="template-card-header">
+        <span class="template-card-title">Template &amp; Send</span>
+      </div>
+      <div class="template-body">
+
+        <div>
+          <div class="panel-label">Message Template</div>
+          <textarea class="template-editor" id="templateEditor"
+            placeholder="Write your template here. Use {{variable}} placeholders."
+            oninput="renderPreview(); updateCharCount(); saveToStorage()"></textarea>
+          <div class="char-count" id="charCount">0 / 2000</div>
+          <div class="vars-hint" style="margin-top:8px;">
+            <div style="margin-bottom:5px;font-size:11px;color:var(--text-3);font-weight:600;">AVAILABLE VARIABLES — click to insert</div>
+            <div id="varTags"></div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div>
+          <div class="panel-label">Preview</div>
+          <div class="preview-box empty-preview" id="previewBox">Write a template above to see a preview.</div>
+        </div>
+
+      </div>
+
+      <div class="send-section">
+        <div class="send-section-title">Send to Discord</div>
+        <div class="send-row">
+          <div class="form-row">
+            <label>Webhook URL</label>
+            <input class="form-input" type="text" id="webhookUrl" placeholder="https://discord.com/api/webhooks/…" oninput="saveToStorage()" />
+          </div>
+          <div class="form-row" style="max-width:160px;">
+            <label>Bot Username</label>
+            <input class="form-input" type="text" id="webhookUsername" placeholder="Optional" oninput="saveToStorage()" />
+          </div>
+        </div>
+
+        <div class="toggle-row">
+          <div>
+            <div class="toggle-label">Send as Thread</div>
+            <div class="toggle-sub">Create a new thread per message</div>
+          </div>
+          <div class="toggle" id="threadToggle" onclick="toggleThread()"></div>
+        </div>
+
+        <div class="thread-options" id="threadOptions">
+          <div class="form-row">
+            <label>Thread Name</label>
+            <input class="form-input" type="text" id="threadName" placeholder="Entry – {{0}}" oninput="saveToStorage()" />
+          </div>
+          <div class="form-row">
+            <label>Channel ID</label>
+            <input class="form-input" type="text" id="channelId" placeholder="123456789012345678" oninput="saveToStorage()" />
+            <span style="font-size:11px;color:var(--text-3);margin-top:3px;">Right-click channel → Copy ID.</span>
+          </div>
+        </div>
+
+        <div class="send-actions">
+          <button class="btn btn-success" id="sendBtn" onclick="sendToDiscord()">
+            <span id="sendBtnContent">↑ Send Selected to Discord</span>
+          </button>
+          <span class="send-status" id="sendStatus"></span>
+        </div>
+      </div>
+    </div>`;
+
+      main.innerHTML = html;
+
+      // Restore saved template and all Discord settings now that the elements exist
+      try {
+        const tpl = localStorage.getItem(LS_TPL_KEY);
+        if (tpl) document.getElementById('templateEditor').value = tpl;
+      } catch { }
+      restoreDiscordSettings();
+
+      renderVarTags();
+      renderPreview();
+      updateCharCount();
+    }
+
+    // ─── Template ─────────────────────────────────────────────────────────────────
+    function renderVarTags() {
+      const container = document.getElementById('varTags');
+      if (!container) return;
+      if (!columns.length) { container.innerHTML = ''; return; }
+      const sample = currentIndex >= 0 ? allData[currentIndex] : (allData.length ? allData[0] : null);
+      container.innerHTML = columns.map((col, i) => {
+        const val = sample ? String(sample[i] ?? '').slice(0, 40) : '';
+        const tip = escapeHtml(col + (val ? ': ' + val : ''));
+        return `<span class="var-tag" onclick="insertVar('${i}')" title="${tip}">${i}: ${escapeHtml(col.length > 16 ? col.slice(0, 15) + '…' : col)}</span>`;
+      }).join('');
+    }
+
+    function insertVar(key) {
+      const ta = document.getElementById('templateEditor');
+      if (!ta) return;
+      const start = ta.selectionStart;
+      const end = ta.selectionEnd;
+      const val = `{{${key}}}`;
+      ta.value = ta.value.slice(0, start) + val + ta.value.slice(end);
+      ta.selectionStart = ta.selectionEnd = start + val.length;
+      ta.focus();
+      renderPreview();
+      updateCharCount();
+      saveToStorage();
+    }
+
+    function renderPreview() {
+      const ta = document.getElementById('templateEditor');
+      const preview = document.getElementById('previewBox');
+      if (!ta || !preview) return;
+      const tmpl = ta.value;
+      if (!tmpl.trim()) {
+        preview.textContent = 'Write a template above to see a preview.';
+        preview.classList.add('empty-preview');
+        return;
+      }
+      if (currentIndex < 0 || !allData[currentIndex]) {
+        preview.textContent = 'Select an item to preview.';
+        preview.classList.add('empty-preview');
+        return;
+      }
+      preview.classList.remove('empty-preview');
+      preview.textContent = applyTemplate(tmpl, allData[currentIndex]);
+    }
+
+    function updateCharCount() {
+      const ta = document.getElementById('templateEditor');
+      const el = document.getElementById('charCount');
+      if (!ta || !el) return;
+      const tmpl = ta.value;
+      const n = (currentIndex >= 0 && allData[currentIndex])
+        ? applyTemplate(tmpl, allData[currentIndex]).length
+        : tmpl.length;
+      el.textContent = `${n} / 2000`;
+      el.className = 'char-count' + (n > 2000 ? ' over' : n > 1800 ? ' warn' : '');
+    }
+
+    // ─── Thread toggle ─────────────────────────────────────────────────────────────
+    function toggleThread() {
+      threadOn = !threadOn;
+      const tog = document.getElementById('threadToggle');
+      const opts = document.getElementById('threadOptions');
+      if (tog) tog.classList.toggle('on', threadOn);
+      if (opts) opts.classList.toggle('visible', threadOn);
+    }
+
+    // ─── Discord Send ─────────────────────────────────────────────────────────────
+    async function sendToDiscord() {
+      const webhookEl = document.getElementById('webhookUrl');
+      const webhook = webhookEl ? webhookEl.value.trim() : '';
+      if (!webhook) { showToast('error', 'Missing webhook', 'Please enter a Discord webhook URL.'); return; }
+      if (!webhook.startsWith('https://discord.com/api/webhooks/') && !webhook.startsWith('https://discordapp.com/api/webhooks/')) {
+        showToast('error', 'Invalid webhook', 'The URL doesn\'t look like a Discord webhook.'); return;
+      }
+      if (!allData.length) { showToast('error', 'No data', 'Load some data first.'); return; }
+
+      const targets = selectedIndices.size > 0
+        ? [...selectedIndices].map(i => allData[i]).filter(Boolean)
+        : (currentIndex >= 0 ? [allData[currentIndex]] : []);
+
+      if (!targets.length) {
+        showToast('error', 'Nothing to send', 'Select items in the sidebar or select an item to send the current one.');
+        return;
+      }
+
+      const ta = document.getElementById('templateEditor');
+      const tmpl = ta ? ta.value : '';
+      const usernameOverride = (document.getElementById('webhookUsername') || {}).value?.trim() || '';
+      const useThread = threadOn;
+      const threadNameTmpl = ((document.getElementById('threadName') || {}).value || '').trim();
+      const channelId = ((document.getElementById('channelId') || {}).value || '').trim();
+
+      // Save webhook
+      try { localStorage.setItem(LS_WH_KEY, webhook); } catch { }
+
+      const btn = document.getElementById('sendBtn');
+      const status = document.getElementById('sendStatus');
+      btn.disabled = true;
+      document.getElementById('sendBtnContent').innerHTML = '<span class="spinner-inline"></span> Sending…';
+
+      let sent = 0, failed = 0;
+      for (const item of targets) {
+        const content = applyTemplate(tmpl, item);
+        if (content.length > 2000) {
+          showToast('error', 'Message too long', `Message for "${getItemLabel(item)}" exceeds 2000 chars (${content.length}). Skipped.`);
+          failed++;
+          continue;
+        }
+
+        const payload = { content };
+        if (usernameOverride) payload.username = usernameOverride;
+
+        if (useThread) {
+          if (!channelId) { showToast('error', 'Missing Channel ID', 'Enter a Channel ID to create threads.'); failed++; continue; }
+          const tName = applyTemplate(threadNameTmpl || 'Entry', item).slice(0, 100);
+          payload.thread_name = tName;
+        }
+
+        try {
+          const url = useThread && channelId ? `${webhook}?thread_id=${channelId}` : webhook;
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+
+          if (!res.ok) {
+            let errMsg = `HTTP ${res.status}`;
+            try {
+              const errData = await res.json();
+              errMsg = errData.message || errMsg;
+              if (errData.errors) errMsg += ' — ' + JSON.stringify(errData.errors).slice(0, 120);
+            } catch { }
+            throw new Error(errMsg);
+          }
+          sent++;
+          if (status) status.textContent = `Sent ${sent}/${targets.length}…`;
+        } catch (e) {
+          showToast('error', `Failed (${getItemLabel(item)})`, e.message);
+          failed++;
+        }
+
+        if (targets.length > 1) await new Promise(r => setTimeout(r, 750));
+      }
+
+      btn.disabled = false;
+      document.getElementById('sendBtnContent').textContent = '↑ Send Selected to Discord';
+
+      if (sent > 0) showToast('success', 'Sent!', `${sent} message${sent > 1 ? 's' : ''} delivered to Discord.`);
+      if (failed > 0) showToast('warning', 'Some failed', `${failed} message${failed > 1 ? 's' : ''} could not be sent.`);
+      if (status) status.textContent = sent > 0 ? `✓ ${sent} sent${failed ? `, ${failed} failed` : ''}` : `${failed} failed`;
+    }
+
+    // ─── Toast ────────────────────────────────────────────────────────────────────
+    function showToast(type, title, msg, duration = 6000) {
+      const icons = { success: '✅', error: '❌', warning: '⚠️' };
+      const container = document.getElementById('toastContainer');
+      const el = document.createElement('div');
+      el.className = `toast ${type}`;
+      el.innerHTML = `<div class="toast-icon">${icons[type] || 'ℹ️'}</div><div class="toast-msg"><strong>${escapeHtml(title)}</strong>${escapeHtml(msg)}</div>`;
+      container.appendChild(el);
+      el.addEventListener('click', () => el.remove());
+      setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity 0.3s'; setTimeout(() => el.remove(), 300); }, duration);
+    }
+
+    // ─── Utility ──────────────────────────────────────────────────────────────────
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    // ─── Init ─────────────────────────────────────────────────────────────────────
+    loadFromStorage();
+  </script>
+</body>
+
+</html>
