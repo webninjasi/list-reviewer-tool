@@ -236,6 +236,7 @@
       padding: 8px 16px;
       border-bottom: 1px solid var(--border);
       flex-shrink: 0;
+      align-items: center;
     }
 
     .sidebar-actions .btn {
@@ -243,6 +244,28 @@
       justify-content: center;
       font-size: 11px;
       padding: 5px 8px;
+    }
+
+    .btn-sort {
+      background: transparent;
+      color: var(--text-3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 5px 8px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.15s, color 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .btn-sort:hover {
+      background: var(--bg-hover);
+      color: var(--text-1);
     }
 
     .sidebar-list {
@@ -353,9 +376,18 @@
       padding: 0 24px 20px;
     }
 
-    .fields-scroll::-webkit-scrollbar { width: 6px; }
-    .fields-scroll::-webkit-scrollbar-track { background: transparent; }
-    .fields-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    .fields-scroll::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .fields-scroll::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .fields-scroll::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
 
     .qa-item {
       padding: 11px 0;
@@ -401,9 +433,18 @@
       gap: 10px;
     }
 
-    .template-body::-webkit-scrollbar { width: 6px; }
-    .template-body::-webkit-scrollbar-track { background: transparent; }
-    .template-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    .template-body::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .template-body::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .template-body::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
 
     .panel-label {
       font-size: 11px;
@@ -464,8 +505,13 @@
       margin-top: 4px;
     }
 
-    .char-count.warn { color: var(--warning); }
-    .char-count.over { color: var(--error); }
+    .char-count.warn {
+      color: var(--warning);
+    }
+
+    .char-count.over {
+      color: var(--error);
+    }
 
     /* ── Preview tab ── */
     .preview-body {
@@ -477,9 +523,18 @@
       gap: 10px;
     }
 
-    .preview-body::-webkit-scrollbar { width: 6px; }
-    .preview-body::-webkit-scrollbar-track { background: transparent; }
-    .preview-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    .preview-body::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .preview-body::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .preview-body::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
 
     .preview-header {
       display: flex;
@@ -488,7 +543,9 @@
       flex-shrink: 0;
     }
 
-    .preview-header .panel-label { margin-bottom: 0; }
+    .preview-header .panel-label {
+      margin-bottom: 0;
+    }
 
     .btn-copy-preview {
       background: var(--bg-hover);
@@ -514,7 +571,6 @@
       padding: 12px;
       font-size: 13px;
       line-height: 1.6;
-      min-height: 80px;
       white-space: pre-wrap;
       word-break: break-word;
       color: var(--text-1);
@@ -551,7 +607,9 @@
       user-select: none;
     }
 
-    .card-tab:hover { color: var(--text-2); }
+    .card-tab:hover {
+      color: var(--text-2);
+    }
 
     .card-tab.active {
       color: var(--accent);
@@ -580,9 +638,18 @@
       gap: 12px;
     }
 
-    .send-body::-webkit-scrollbar { width: 6px; }
-    .send-body::-webkit-scrollbar-track { background: transparent; }
-    .send-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    .send-body::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .send-body::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .send-body::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
 
     .send-section-title {
       font-size: 11px;
@@ -626,7 +693,9 @@
       width: 100%;
     }
 
-    .form-input:focus { border-color: var(--accent); }
+    .form-input:focus {
+      border-color: var(--accent);
+    }
 
     .send-actions {
       display: flex;
@@ -635,7 +704,9 @@
       padding-top: 4px;
     }
 
-    .send-actions .btn { padding: 10px 20px; }
+    .send-actions .btn {
+      padding: 10px 20px;
+    }
 
     .send-status {
       font-size: 12px;
@@ -777,8 +848,10 @@
     </div>
     <div class="topbar-actions">
       <button class="btn btn-ghost" onclick="exportConfig()" title="Export all settings to a JSON file">Export</button>
-      <button class="btn btn-ghost" onclick="document.getElementById('importFileInput').click()" title="Import settings from a JSON file">Import</button>
-      <input type="file" id="importFileInput" accept=".json,application/json" style="display:none" onchange="importConfig(event)" />
+      <button class="btn btn-ghost" onclick="document.getElementById('importFileInput').click()"
+        title="Import settings from a JSON file">Import</button>
+      <input type="file" id="importFileInput" accept=".json,application/json" style="display:none"
+        onchange="importConfig(event)" />
       <div class="topbar-sep"></div>
       <button class="btn btn-primary" id="loadBtn" onclick="loadData()">
         <span id="loadBtnContent">Load</span>
@@ -802,7 +875,9 @@
         <button class="btn btn-ghost" id="selectAllBtn" onclick="selectAllVisible()"
           title="Select all visible">All</button>
         <button class="btn btn-ghost" id="selectNoneBtn" onclick="selectNone()" title="Deselect all">None</button>
-        <span id="selectionLabel" style="font-size:11px;color:var(--text-3);align-self:center;margin-left:2px;"></span>
+        <span id="selectionLabel"
+          style="font-size:11px;color:var(--text-3);align-self:center;margin-left:2px;flex:1"></span>
+        <button class="btn-sort" id="sortBtn" onclick="toggleSort()" title="Toggle sort order">↓ Newest</button>
       </div>
       <div class="sidebar-list" id="sidebarList">
         <div class="empty-state" style="padding: 30px 16px;">
@@ -835,12 +910,14 @@
     let currentIndex = -1;
     let selectedIndices = new Set();
     let activeTab = 'fields'; // 'fields' | 'template' | 'preview' | 'webhook'
+    let sortOrder = 'desc';   // 'asc' | 'desc'
 
     const LS_URL_KEY = 'listreviewer_url';
     const LS_TPL_KEY = 'listreviewer_template';
-    const LS_WH_KEY   = 'listreviewer_webhook';
-    const LS_WH_USER  = 'listreviewer_wh_user';
+    const LS_WH_KEY = 'listreviewer_webhook';
+    const LS_WH_USER = 'listreviewer_wh_user';
     const LS_WH_TNAME = 'listreviewer_wh_tname';
+    const LS_WH_AVA = 'listreviewer_wh_avatar';
 
     // ─── Date helpers ─────────────────────────────────────────────────────────────
     // Returns a Unix timestamp (seconds) if the value looks like a parseable ISO date, else null.
@@ -937,6 +1014,8 @@
         if (whUEl) localStorage.setItem(LS_WH_USER, whUEl.value);
         const tnEl = document.getElementById('threadName');
         if (tnEl) localStorage.setItem(LS_WH_TNAME, tnEl.value);
+        const avaEl = document.getElementById('webhookAvatar');
+        if (avaEl) localStorage.setItem(LS_WH_AVA, avaEl.value);
       } catch { }
     }
 
@@ -950,23 +1029,26 @@
 
     function restoreDiscordSettings() {
       try {
-        const wh    = localStorage.getItem(LS_WH_KEY);
-        const whU   = localStorage.getItem(LS_WH_USER);
+        const wh = localStorage.getItem(LS_WH_KEY);
+        const whU = localStorage.getItem(LS_WH_USER);
         const tName = localStorage.getItem(LS_WH_TNAME);
-        if (wh)    document.getElementById('webhookUrl').value = wh;
-        if (whU)   document.getElementById('webhookUsername').value = whU;
+        const ava = localStorage.getItem(LS_WH_AVA);
+        if (wh) document.getElementById('webhookUrl').value = wh;
+        if (whU) document.getElementById('webhookUsername').value = whU;
         if (tName) document.getElementById('threadName').value = tName;
+        if (ava) { const el = document.getElementById('webhookAvatar'); if (el) el.value = ava; }
       } catch { }
     }
 
     // ─── Config Import / Export ───────────────────────────────────────────────────
-    const CONFIG_KEYS = [LS_URL_KEY, LS_TPL_KEY, LS_WH_KEY, LS_WH_USER, LS_WH_TNAME];
+    const CONFIG_KEYS = [LS_URL_KEY, LS_TPL_KEY, LS_WH_KEY, LS_WH_USER, LS_WH_TNAME, LS_WH_AVA];
     const CONFIG_LABELS = {
-      [LS_URL_KEY]:   'jsonUrl',
-      [LS_TPL_KEY]:   'template',
-      [LS_WH_KEY]:    'webhookUrl',
-      [LS_WH_USER]:   'webhookUsername',
-      [LS_WH_TNAME]:  'threadName',
+      [LS_URL_KEY]: 'jsonUrl',
+      [LS_TPL_KEY]: 'template',
+      [LS_WH_KEY]: 'webhookUrl',
+      [LS_WH_USER]: 'webhookUsername',
+      [LS_WH_TNAME]: 'threadName',
+      [LS_WH_AVA]: 'webhookAvatar',
     };
 
     function exportConfig() {
@@ -1017,8 +1099,7 @@
             const tplEl = document.getElementById('templateEditor');
             if (tplEl) { const v = localStorage.getItem(LS_TPL_KEY); if (v) { tplEl.value = v; renderPreview(); updateCharCount(); } }
           } catch { }
-          restoreDiscordSettings();
-          showToast('success', 'Imported', `${applied} setting${applied !== 1 ? 's' : ''} restored.`);
+          restoreDiscordSettings(); showToast('success', 'Imported', `${applied} setting${applied !== 1 ? 's' : ''} restored.`);
         } catch (err) {
           showToast('error', 'Import failed', 'Could not parse file: ' + err.message);
         }
@@ -1067,6 +1148,7 @@
         filteredData = [...allData];
         selectedIndices.clear();
         currentIndex = -1;
+        applySort();
         renderSidebar();
         showToast('success', 'Loaded', `${allData.length} row${allData.length !== 1 ? 's' : ''} loaded (${columns.length} columns).`);
       } catch (e) {
@@ -1138,7 +1220,22 @@
     function filterList() {
       const q = document.getElementById('searchInput').value.toLowerCase();
       filteredData = allData.filter(row => row.some(v => String(v ?? '').toLowerCase().includes(q)));
+      applySort();
       renderSidebar();
+    }
+
+    function applySort() {
+      if (sortOrder === 'desc') {
+        filteredData = [...filteredData].reverse();
+      }
+      // 'asc' = natural order (as received), so nothing to do beyond the filter above
+    }
+
+    function toggleSort() {
+      sortOrder = sortOrder === 'desc' ? 'asc' : 'desc';
+      const btn = document.getElementById('sortBtn');
+      if (btn) btn.textContent = sortOrder === 'desc' ? '↓ Newest' : '↑ Oldest';
+      filterList();
     }
 
     function selectItem(idx, event) {
@@ -1216,14 +1313,18 @@
         <div class="card-tab-panel" id="panel-webhook">
           <div class="send-body">
             <div class="send-section-title">Discord Webhook</div>
+            <div class="form-row">
+              <label>Webhook URL</label>
+              <input class="form-input" type="text" id="webhookUrl" placeholder="https://discord.com/api/webhooks/…" oninput="saveToStorage()" />
+            </div>
             <div class="send-row">
               <div class="form-row">
-                <label>Webhook URL</label>
-                <input class="form-input" type="text" id="webhookUrl" placeholder="https://discord.com/api/webhooks/…" oninput="saveToStorage()" />
-              </div>
-              <div class="form-row" style="max-width:160px;">
                 <label>Bot Username</label>
-                <input class="form-input" type="text" id="webhookUsername" placeholder="Optional" oninput="saveToStorage()" />
+                <input class="form-input" type="text" id="webhookUsername" placeholder="Optional override" oninput="saveToStorage()" />
+              </div>
+              <div class="form-row">
+                <label>Avatar URL</label>
+                <input class="form-input" type="text" id="webhookAvatar" placeholder="https://…/avatar.png" oninput="saveToStorage()" />
               </div>
             </div>
             <div class="form-row">
@@ -1443,6 +1544,7 @@
       const ta = document.getElementById('templateEditor');
       const tmpl = ta ? ta.value : '';
       const usernameOverride = (document.getElementById('webhookUsername') || {}).value?.trim() || '';
+      const avatarOverride = (document.getElementById('webhookAvatar') || {}).value?.trim() || '';
       const threadNameTmpl = ((document.getElementById('threadName') || {}).value || '').trim();
 
       // Save webhook
@@ -1464,6 +1566,7 @@
         // flags: 4 = SUPPRESS_EMBEDS
         const firstPayload = { content: parts[0], thread_name: tName, flags: 4 };
         if (usernameOverride) firstPayload.username = usernameOverride;
+        if (avatarOverride) firstPayload.avatar_url = avatarOverride;
 
         let threadId = null;
         try {
@@ -1499,6 +1602,7 @@
         for (let p = 1; p < parts.length; p++) {
           const followPayload = { content: parts[p], flags: 4 };
           if (usernameOverride) followPayload.username = usernameOverride;
+          if (avatarOverride) followPayload.avatar_url = avatarOverride;
 
           const followUrl = threadId ? `${webhook}?thread_id=${threadId}&wait=true` : webhook + '?wait=true';
           try {
