@@ -519,6 +519,8 @@
       word-break: break-word;
       color: var(--text-1);
       font-family: 'Inter', sans-serif;
+      align-self: flex-start;
+      width: 100%;
     }
 
     .preview-box.empty-preview {
@@ -774,6 +776,10 @@
       <input type="text" id="jsonUrl" placeholder="https://example.com/data.json" />
     </div>
     <div class="topbar-actions">
+      <button class="btn btn-ghost" onclick="exportConfig()" title="Export all settings to a JSON file">Export</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('importFileInput').click()" title="Import settings from a JSON file">Import</button>
+      <input type="file" id="importFileInput" accept=".json,application/json" style="display:none" onchange="importConfig(event)" />
+      <div class="topbar-sep"></div>
       <button class="btn btn-primary" id="loadBtn" onclick="loadData()">
         <span id="loadBtnContent">Load</span>
       </button>
@@ -951,6 +957,73 @@
         if (whU)   document.getElementById('webhookUsername').value = whU;
         if (tName) document.getElementById('threadName').value = tName;
       } catch { }
+    }
+
+    // ─── Config Import / Export ───────────────────────────────────────────────────
+    const CONFIG_KEYS = [LS_URL_KEY, LS_TPL_KEY, LS_WH_KEY, LS_WH_USER, LS_WH_TNAME];
+    const CONFIG_LABELS = {
+      [LS_URL_KEY]:   'jsonUrl',
+      [LS_TPL_KEY]:   'template',
+      [LS_WH_KEY]:    'webhookUrl',
+      [LS_WH_USER]:   'webhookUsername',
+      [LS_WH_TNAME]:  'threadName',
+    };
+
+    function exportConfig() {
+      // Always snapshot current form values first so nothing is missed
+      saveToStorage();
+      const config = {};
+      CONFIG_KEYS.forEach(k => {
+        try {
+          const v = localStorage.getItem(k);
+          if (v !== null) config[CONFIG_LABELS[k]] = v;
+        } catch { }
+      });
+      const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'listreviewer-config.json';
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('success', 'Exported', 'Config saved as listreviewer-config.json');
+    }
+
+    function importConfig(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      // Reset the input so the same file can be re-imported if needed
+      event.target.value = '';
+      const reader = new FileReader();
+      reader.onload = e => {
+        try {
+          const config = JSON.parse(e.target.result);
+          // Reverse-map label → LS key
+          const labelToKey = Object.fromEntries(Object.entries(CONFIG_LABELS).map(([k, v]) => [v, k]));
+          let applied = 0;
+          Object.entries(config).forEach(([label, value]) => {
+            const lsKey = labelToKey[label];
+            if (lsKey && typeof value === 'string') {
+              try { localStorage.setItem(lsKey, value); applied++; } catch { }
+            }
+          });
+          if (applied === 0) { showToast('warning', 'Nothing imported', 'No recognised keys found in the file.'); return; }
+
+          // Apply to live DOM
+          const urlEl = document.getElementById('jsonUrl');
+          if (urlEl) { const v = localStorage.getItem(LS_URL_KEY); if (v) urlEl.value = v; }
+          // Template + Discord fields are inside the dynamic panel — restore if present
+          try {
+            const tplEl = document.getElementById('templateEditor');
+            if (tplEl) { const v = localStorage.getItem(LS_TPL_KEY); if (v) { tplEl.value = v; renderPreview(); updateCharCount(); } }
+          } catch { }
+          restoreDiscordSettings();
+          showToast('success', 'Imported', `${applied} setting${applied !== 1 ? 's' : ''} restored.`);
+        } catch (err) {
+          showToast('error', 'Import failed', 'Could not parse file: ' + err.message);
+        }
+      };
+      reader.readAsText(file);
     }
 
     // ─── Load Data ────────────────────────────────────────────────────────────────
@@ -1388,7 +1461,8 @@
         const tName = applyTemplate(threadNameTmpl || 'Entry', item).slice(0, 100);
 
         // First message: creates the forum thread (includes thread_name)
-        const firstPayload = { content: parts[0], thread_name: tName };
+        // flags: 4 = SUPPRESS_EMBEDS
+        const firstPayload = { content: parts[0], thread_name: tName, flags: 4 };
         if (usernameOverride) firstPayload.username = usernameOverride;
 
         let threadId = null;
@@ -1423,7 +1497,7 @@
 
         // Subsequent parts: reply into the same thread
         for (let p = 1; p < parts.length; p++) {
-          const followPayload = { content: parts[p] };
+          const followPayload = { content: parts[p], flags: 4 };
           if (usernameOverride) followPayload.username = usernameOverride;
 
           const followUrl = threadId ? `${webhook}?thread_id=${threadId}&wait=true` : webhook + '?wait=true';
