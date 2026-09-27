@@ -843,8 +843,8 @@
     <div class="topbar-logo">List<span>Reviewer</span></div>
     <div class="topbar-sep"></div>
     <div class="topbar-url-group">
-      <label>JSON URL</label>
-      <input type="text" id="jsonUrl" placeholder="https://example.com/data.json" />
+      <label>JSON / CSV / Google Sheets URL</label>
+      <input type="text" id="jsonUrl" placeholder="https://example.com/data.csv or docs.google.com/spreadsheets/..." />
     </div>
     <div class="topbar-actions">
       <button class="btn btn-ghost" onclick="exportConfig()" title="Export all settings to a JSON file">Export</button>
@@ -853,6 +853,10 @@
       <input type="file" id="importFileInput" accept=".json,application/json" style="display:none"
         onchange="importConfig(event)" />
       <div class="topbar-sep"></div>
+      <button class="btn btn-ghost" onclick="document.getElementById('dataFileInput').click()"
+        title="Open a local JSON or CSV data file">File</button>
+      <input type="file" id="dataFileInput" accept=".json,.csv,application/json,text/csv" style="display:none"
+        onchange="loadDataFile(event)" />
       <button class="btn btn-primary" id="loadBtn" onclick="loadData()">
         <span id="loadBtnContent">Load</span>
       </button>
@@ -883,7 +887,7 @@
         <div class="empty-state" style="padding: 30px 16px;">
           <div class="empty-state-icon">📋</div>
           <div class="empty-state-title">No items</div>
-          <div class="empty-state-sub">Enter a JSON URL above and click Load to get started.</div>
+          <div class="empty-state-sub">Enter a JSON/CSV or Google Sheets URL above, or open a local JSON/CSV file.</div>
         </div>
       </div>
     </div>
@@ -1108,54 +1112,226 @@
     }
 
     // ─── Load Data ────────────────────────────────────────────────────────────────
-    async function loadData() {
-      const url = document.getElementById('jsonUrl').value.trim();
-      if (!url) { showToast('error', 'Missing URL', 'Please enter a JSON URL to load.'); return; }
-
-      saveToStorage();
-
+    function setLoadBusy(isBusy) {
       const btn = document.getElementById('loadBtn');
-      document.getElementById('loadBtnContent').innerHTML = '<span class="spinner-inline"></span>';
-      btn.disabled = true;
+      const content = document.getElementById('loadBtnContent');
+      if (btn) btn.disabled = isBusy;
+      if (content) content.innerHTML = isBusy ? '<span class="spinner-inline"></span>' : 'Load';
+    }
 
-      try {
-        const res = await fetch(url);
-        if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
-        const data = await res.json();
+    // RFC 4180-style CSV parser. Handles quoted commas, escaped quotes,
+    // CRLF/LF, multiline quoted fields, empty cells, and UTF-8 BOM.
+    function parseCsv(text) {
+      text = String(text ?? '');
+      if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
 
-        if (!Array.isArray(data)) throw new Error('Expected a JSON array at the root level, but got: ' + typeof data);
-        if (data.length === 0) { showToast('warning', 'Empty list', 'The JSON loaded successfully but contains no items.'); }
+      const rows = [];
+      let row = [];
+      let field = '';
+      let inQuotes = false;
 
-        // 2-D array: first row is column headers
-        if (Array.isArray(data[0])) {
-          columns = data[0].map(c => c !== null && c !== undefined ? String(c) : '');
-          allData = data.slice(1);
-        } else {
-          // Array of objects: preserve insertion order; duplicate keys get separate columns
-          const allKeys = [];
-          data.forEach(obj => {
-            Object.keys(obj).forEach(k => { if (!allKeys.includes(k)) allKeys.push(k); });
-          });
-          columns = allKeys;
-          allData = data.map(obj => {
-            // Walk entries in the order they appear in this object
-            const entries = Object.entries(obj);
-            // Build row positionally: for each expected column slot use the value if present
-            return allKeys.map(k => obj.hasOwnProperty(k) ? obj[k] ?? '' : '');
-          });
+      for (let i = 0; i < text.length; i++) {
+        const ch = text[i];
+        if (inQuotes) {
+          if (ch === '"') {
+            if (text[i + 1] === '"') {
+              field += '"';
+              i++;
+            } else {
+              inQuotes = false;
+            }
+          } else {
+            field += ch;
+          }
+          continue;
         }
 
-        filteredData = [...allData];
-        selectedIndices.clear();
-        currentIndex = -1;
-        applySort();
-        renderSidebar();
-        showToast('success', 'Loaded', `${allData.length} row${allData.length !== 1 ? 's' : ''} loaded (${columns.length} columns).`);
+        if (ch === '"' && field.length === 0) {
+          inQuotes = true;
+        } else if (ch === ',') {
+          row.push(field);
+          field = '';
+        } else if (ch === '\n' || ch === '\r') {
+          if (ch === '\r' && text[i + 1] === '\n') i++;
+          row.push(field);
+          rows.push(row);
+          row = [];
+          field = '';
+        } else {
+          field += ch;
+        }
+      }
+
+      if (inQuotes) throw new Error('CSV contains an unterminated quoted field.');
+      if (field.length > 0 || row.length > 0) {
+        row.push(field);
+        rows.push(row);
+      }
+      while (rows.length && rows[rows.length - 1].every(v => v === '')) rows.pop();
+      return rows;
+    }
+
+    // Rewrite Google Sheets sharing/edit URLs to a CSV endpoint only for fetch().
+    // The original URL remains visible and stored unchanged.
+    function normalizeDataUrl(inputUrl) {
+      let parsed;
+      try {
+        parsed = new URL(inputUrl);
+      } catch (_) {
+        return { url: inputUrl, isGoogleSheet: false };
+      }
+
+      if (parsed.hostname.toLowerCase() !== 'docs.google.com') {
+        return { url: inputUrl, isGoogleSheet: false };
+      }
+
+      const path = parsed.pathname;
+      const publishedMatch = path.match(/\/spreadsheets\/(?:u\/\d+\/)?d\/e\/([^/]+)/i);
+      const normalMatch = path.match(/\/spreadsheets\/(?:u\/\d+\/)?d\/([^/]+)/i);
+      if (!publishedMatch && !normalMatch) {
+        return { url: inputUrl, isGoogleSheet: false };
+      }
+
+      let gid = parsed.searchParams.get('gid');
+      if (!gid && parsed.hash) {
+        const hashParams = new URLSearchParams(parsed.hash.slice(1));
+        gid = hashParams.get('gid');
+      }
+
+      let csvUrl;
+      if (publishedMatch) {
+        csvUrl = new URL(`https://docs.google.com/spreadsheets/d/e/${publishedMatch[1]}/pub`);
+        csvUrl.searchParams.set('output', 'csv');
+      } else {
+        csvUrl = new URL(`https://docs.google.com/spreadsheets/d/${normalMatch[1]}/gviz/tq`);
+        csvUrl.searchParams.set('tqx', 'out:csv');
+      }
+      if (gid) csvUrl.searchParams.set('gid', gid);
+
+      return { url: csvUrl.toString(), isGoogleSheet: true };
+    }
+
+    function detectDataFormat(sourceName, contentType, text) {
+      const name = String(sourceName || '').split(/[?#]/)[0].toLowerCase();
+      const type = String(contentType || '').toLowerCase();
+      const trimmed = String(text || '').trimStart();
+
+      if (name.endsWith('.csv') || type.includes('text/csv') || type.includes('application/csv')) return 'csv';
+      if (name.endsWith('.json') || type.includes('application/json') || type.includes('+json')) return 'json';
+      if (trimmed.startsWith('[') || trimmed.startsWith('{')) return 'json';
+      return 'csv';
+    }
+
+    function parseDataText(text, sourceName = '', contentType = '') {
+      const format = detectDataFormat(sourceName, contentType, text);
+      if (format === 'json') {
+        try {
+          return { format, data: JSON.parse(text) };
+        } catch (e) {
+          throw new Error('Invalid JSON: ' + e.message);
+        }
+      }
+      return { format, data: parseCsv(text) };
+    }
+
+    function normalizeData(data) {
+      if (!Array.isArray(data)) {
+        throw new Error('Expected a JSON array or CSV rows at the root level.');
+      }
+
+      if (data.length === 0) {
+        columns = [];
+        allData = [];
+        return;
+      }
+
+      if (Array.isArray(data[0])) {
+        if (!data.every(Array.isArray)) {
+          throw new Error('Mixed array data is not supported; use rows consistently.');
+        }
+        const maxColumns = data.reduce((max, row) => Math.max(max, row.length), 0);
+        columns = data[0].map(c => c !== null && c !== undefined ? String(c) : '');
+        while (columns.length < maxColumns) columns.push(`Column ${columns.length + 1}`);
+        allData = data.slice(1).map(row =>
+          columns.map((_, i) => row[i] !== null && row[i] !== undefined ? row[i] : '')
+        );
+        return;
+      }
+
+      const isObjectRow = value => value && typeof value === 'object' && !Array.isArray(value);
+      if (!data.every(isObjectRow)) {
+        throw new Error('JSON must be an array of objects or a 2-D array with a header row.');
+      }
+
+      const allKeys = [];
+      data.forEach(obj => {
+        Object.keys(obj).forEach(k => { if (!allKeys.includes(k)) allKeys.push(k); });
+      });
+      columns = allKeys;
+      allData = data.map(obj =>
+        allKeys.map(k => Object.prototype.hasOwnProperty.call(obj, k) ? (obj[k] ?? '') : '')
+      );
+    }
+
+    function finishDataLoad(data, format, sourceLabel) {
+      normalizeData(data);
+      filteredData = [...allData];
+      selectedIndices.clear();
+      currentIndex = -1;
+      applySort();
+      renderSidebar();
+
+      if (allData.length === 0) {
+        showToast('warning', 'Empty list', `${sourceLabel} loaded successfully but contains no data rows.`);
+      } else {
+        showToast('success', 'Loaded', `${allData.length} row${allData.length !== 1 ? 's' : ''} loaded from ${format.toUpperCase()} (${columns.length} columns).`);
+      }
+    }
+
+    async function loadData() {
+      const url = document.getElementById('jsonUrl').value.trim();
+      if (!url) {
+        showToast('error', 'Missing URL', 'Please enter a JSON, CSV, or Google Sheets URL to load.');
+        return;
+      }
+
+      const source = normalizeDataUrl(url);
+      saveToStorage();
+      setLoadBusy(true);
+
+      try {
+        const res = await fetch(source.url);
+        if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
+
+        const text = await res.text();
+        const { format, data } = parseDataText(text, source.url, res.headers.get('content-type') || '');
+        finishDataLoad(data, format, source.isGoogleSheet ? 'The Google Sheet' : 'The URL');
       } catch (e) {
-        showToast('error', 'Load failed', e.message);
+        const corsHint = e instanceof TypeError ? ' The server may not allow browser requests (CORS).' : '';
+        const sheetHint = source.isGoogleSheet
+          ? ' Make sure the Google Sheet is shared so anyone with the link can view it.'
+          : '';
+        showToast('error', 'Load failed', e.message + corsHint + sheetHint);
       } finally {
-        document.getElementById('loadBtnContent').textContent = 'Load';
-        btn.disabled = false;
+        setLoadBusy(false);
+      }
+    }
+
+    async function loadDataFile(event) {
+      const input = event.target;
+      const file = input.files && input.files[0];
+      if (!file) return;
+
+      input.value = '';
+      setLoadBusy(true);
+      try {
+        const text = await file.text();
+        const { format, data } = parseDataText(text, file.name, file.type);
+        finishDataLoad(data, format, file.name);
+      } catch (e) {
+        showToast('error', 'File load failed', e.message);
+      } finally {
+        setLoadBusy(false);
       }
     }
 
